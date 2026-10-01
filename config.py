@@ -160,14 +160,12 @@ V𝟹.𝟶.𝟶 [STABLE]
     
     RKN_PROGRESS = """<b>
 
-「 🚀 Goku Stark PROCESSING 」
+⦿ 📈 𝙿𝚛𝚘𝚐𝚛𝚎𝚜𝚜  : {0}%
+⦿ 📦 𝚂𝚒𝚣𝚎      : {1} / {2}
+⦿ ⚡ 𝚂𝚙𝚎𝚎𝚍     : {3}/s
+⦿ ⏳ 𝙴𝚃𝙰       : {4}
 
-├ 📦 Size    : {1} / {2}
-├ 📊 Progress: {0}%
-├ ⚡ Speed   : {3}/s
-├ ⏱ ETA      : {4}
-│
-╰─「 Please wait... 」
+════ 「 Please wait... 」 ════
 </b>"""
 
 # Rkn Developer 
