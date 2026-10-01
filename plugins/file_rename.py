@@ -169,7 +169,7 @@ async def manual_rename_message(client, message):
             self.data = f'upload#{u_type}'
             self.from_user = usr
 
-    await upload_doc(client, DummyUpdate(processing_msg, message.from_user, upload_type))
+    await upload_doc(client, DummyUpdate(processing_msg, message.from_user, upload_type), requested_name=requested_name)
 
 async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption, duration, rkn_processing):
     """
@@ -226,11 +226,11 @@ async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption,
 
 renamer = EnhancedAutoRenamer()
 
-async def upload_doc(bot, update):
+async def upload_doc(bot, update, requested_name=None):
     rkn_processing = await update.message.edit("`Processing...`")
         
     user_id = int(update.message.chat.id) 
-    new_name = update.message.text
+    new_name = requested_name or update.message.text
 
     # msg file location 
     file = update.message.reply_to_message
