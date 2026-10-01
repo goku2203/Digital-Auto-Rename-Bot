@@ -273,6 +273,34 @@ async def upload_doc(bot, update):
     await remove_path(ph_path, file_path, dl_path)
     return await rkn_processing.edit("Uploaded Successfully....")
 
+@Client.on_message(filters.private & filters.command("set_type"))
+async def set_media_cmd(client, message):
+    buttons = [
+        [
+            InlineKeyboardButton("📁 Document", callback_data="set_type_doc"),
+            InlineKeyboardButton("🎥 Video", callback_data="set_type_video")
+        ],
+        [
+            InlineKeyboardButton("✖️ Cancel", callback_data="close")
+        ]
+    ]
+    await message.reply_text(
+        "**Select Default Output Format:**\n\nIthula neenga select pandra format la thaan ini automatic ah file veliya varum.",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+@Client.on_callback_query(filters.regex(r"^set_type_"))
+async def set_type_callback(client, callback_query):
+    user_id = callback_query.from_user.id
+    data = callback_query.data
+    
+    if data == "set_type_doc":
+        await digital_botz.set_upload_type(user_id, "doc")
+        await callback_query.message.edit_text("✅ Default Output set to: **DOCUMENT**\n\nIni automatic ah file Document ah convert aagum!")
+    elif data == "set_type_video":
+        await digital_botz.set_upload_type(user_id, "video")
+        await callback_query.message.edit_text("✅ Default Output set to: **VIDEO**\n\nIni automatic ah file Video ah convert aagum!")
+
 # @RknDeveloper
 # ✅ Team-RknDeveloper
 # Rkn Developer 
