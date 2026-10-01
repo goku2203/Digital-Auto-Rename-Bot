@@ -78,7 +78,26 @@ async def rename_start(client, message):
     mime_type = rkn_file.mime_type
     dcid = FileId.decode(rkn_file.file_id).dc_id
     extension_type = mime_type.split('/')[0]
-    
+
+    # User-selected rename mode is persistent in MongoDB.
+    rename_mode = await digital_botz.get_rename_mode(user_id)
+
+    # Manual mode: wait for the user to reply with the new filename.
+    if rename_mode == 'manual':
+        await message.reply(
+            text=(
+                f'✍️ **Manual Rename Mode**\n\n'
+                f'◈ Old File Name: `{filename}`\n'
+                f'◈ File Size: `{filesize}`\n\n'
+                'New file name-a reply pannunga.'
+            ),
+            reply_to_message_id=message.id,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton('✖️ Cancel', callback_data='mode_cancel')]
+            ])
+        )
+        return
+
     upload_type = await digital_botz.get_upload_type(user_id)
     if upload_type:
         class DummyUpdate:
@@ -107,6 +126,50 @@ async def rename_start(client, message):
             reply_to_message_id=message.id,
             reply_markup=InlineKeyboardMarkup(button)
         )
+
+@Client.on_message(filters.private & filters.text)
+async def manual_rename_message(client, message):
+    if not message.reply_to_message or not message.text:
+        return
+
+    replied = message.reply_to_message
+    user_id = message.from_user.id
+    bot_user = await client.get_me()
+    if not replied.from_user or replied.from_user.id != bot_user.id:
+        return
+
+    original = replied.reply_to_message
+    if not original or not original.media:
+        return
+
+    if await digital_botz.get_rename_mode(user_id) != 'manual':
+        return
+
+    media = getattr(original, original.media.value, None)
+    if not media or not getattr(media, 'file_name', None):
+        return
+
+    requested_name = message.text.strip()
+    if not requested_name:
+        return
+
+    if not os.path.splitext(requested_name)[1]:
+        original_ext = os.path.splitext(media.file_name)[1]
+        if original_ext:
+            requested_name += original_ext
+
+    upload_type = await digital_botz.get_upload_type(user_id) or 'document'
+    processing_msg = await message.reply('`Processing...`', reply_to_message_id=message.id)
+    processing_msg.reply_to_message = original
+    processing_msg.text = requested_name
+
+    class DummyUpdate:
+        def __init__(self, msg, usr, u_type):
+            self.message = msg
+            self.data = f'upload#{u_type}'
+            self.from_user = usr
+
+    await upload_doc(client, DummyUpdate(processing_msg, message.from_user, upload_type))
 
 async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption, duration, rkn_processing):
     """
