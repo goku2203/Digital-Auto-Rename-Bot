@@ -82,12 +82,17 @@ class DigitalAutoRenameBot(Client):
         await aiohttp.web.TCPSite(app, bind_address, Config.PORT).start()
 
         path = "plugins/*.py"
-        # Stable alphabetical loading ensures zzz_* compatibility patches load last.
         files = sorted(glob.glob(path))
+        # file_rename.py and auto_rename.py are already imported above through
+        # file_rename.app. Loading them again registers duplicate handlers.
+        skip_plugins = {"file_rename", "auto_rename"}
         for name in files:
             with open(name) as a:
                 patt = Path(a.name)
                 plugin_name = patt.stem.replace(".py", "")
+                if plugin_name in skip_plugins:
+                    print("Digital Botz Skipped " + plugin_name + " (already loaded)")
+                    continue
                 plugins_path = Path(f"plugins/{plugin_name}.py")
                 import_path = "plugins.{}".format(plugin_name)
                 spec = importlib.util.spec_from_file_location(import_path, plugins_path)
@@ -101,7 +106,7 @@ class DigitalAutoRenameBot(Client):
         for id in Config.ADMIN:
             if Config.STRING_SESSION:
                 try:
-                    await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬𝐮𝐩𝐩𝐨𝐫𝐭𝐬 𝟐𝐆𝐁+ 𝐟𝐢𝐥𝐞𝐬.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")
+                    await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬ᴜᴘᴘᴏʀᴛs 𝟐𝐆𝐁+ 𝐟𝐢𝐥ᴇs.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")
                 except:
                     pass
             else:
@@ -143,7 +148,7 @@ def main():
         if Config.STRING_SESSION:
             await asyncio.gather(app.stop(), digital_instance.stop())
         else:
-            await asyncio.gather(digital_instance.stop())
+            await digital_instance.stop()
 
     loop = asyncio.get_event_loop()
     try:
