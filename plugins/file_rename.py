@@ -191,7 +191,7 @@ async def upload_doc(bot, update):
     if not new_name.endswith(f".{info['extension']}"):
         new_name += f".{info['extension']}"
         
-    new_filename = new_name
+    new_filename = new_name.replace('_', ' ')
         
     # File paths for download
     file_path = f"Renames/{new_filename}"
@@ -210,8 +210,9 @@ async def upload_doc(bot, update):
     
     if os.path.exists(out_path):
         os.remove(file_path)
-        file_path = out_path
-        final_file_path = out_path
+        final_clean_path = f"Renames/{new_filename}"
+        os.rename(out_path, final_clean_path)
+        final_file_path = final_clean_path
 
     await rkn_processing.edit("`Try To Uploading....`")        
     duration = 0
