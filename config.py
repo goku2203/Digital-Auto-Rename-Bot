@@ -164,7 +164,8 @@ V𝟹.𝟶.𝟶 [STABLE]
     
     
     RKN_PROGRESS = """<b>
-╭─「 🚀 Goku Stark PROCESSING 」
+│
+├「 🚀 Goku Stark PROCESSING 」
 │
 ├ 📦 Size    : {1} / {2}
 ├ 📊 Progress: {0}%
