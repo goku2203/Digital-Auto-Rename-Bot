@@ -1,5 +1,5 @@
 # Use the official Python image
-FROM python:3.9-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 RUN apt-get update -qq && apt-get -y install ffmpeg
 
