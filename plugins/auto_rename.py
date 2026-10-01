@@ -64,7 +64,14 @@ class EnhancedAutoRenamer:
         }
         
         # Clean filename for parsing
-        clean_name = filename.replace('_', ' ').replace('.', ' ')
+        clean_name = filename.replace('_', ' ')
+        
+        # First, remove website tags like [HindiAnimeZone], www.xyz.com, @channel
+        clean_name = re.sub(r'^\[.*?\]\s*|^\(.*?\)\s*|^@\w+\s*', '', clean_name)
+        clean_name = re.sub(r'^(?:www\.)?[a-zA-Z0-9-]+\.(?:com|net|org|in|cc|site|bz)\s*', '', clean_name, flags=re.IGNORECASE)
+        
+        # Now remove dots for safe parsing
+        clean_name = clean_name.replace('.', ' ')
         
         # Title extraction (before year or quality)
         title_match = re.search(r'^([A-Za-z0-9\s\.\-]+?)(?=\s*[\(\[]?\d{4}[\)\]]?|\s*\d{3,4}p|\s*[Ss]\d)', clean_name, re.IGNORECASE)
