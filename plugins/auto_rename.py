@@ -27,7 +27,7 @@ _SEP = r"[\s_\-.|:]"            # separators after a prefix
 _END = rf"(?=[\s_\-.|:\]\)]|$)"  # prefix must end at a separator / end
 
 # --- START-only prefix patterns (all anchored with ^) ---
-RE_BOX = re.compile(r"^\s*(?:\[[^\]]*\]|\((?!(?:19\vert{}20)\d{2}\))[^)]*\)|\{[^}]*\})\s*")
+RE_BOX = re.compile(r"^\s*(?:\[[^\]]*\]|\((?!(?:19|20)\d{2}\))[^)]*\)|\{[^}]*\})\s*")
 RE_DOMAIN = re.compile(
     rf"^\s*(?:https?://)?(?:www\.)?[A-Za-z0-9][A-Za-z0-9\-]*(?:\.[A-Za-z0-9\-]+)*\.(?:{_TLDS}){_END}{_SEP}*",
     re.IGNORECASE,
