@@ -87,7 +87,7 @@ async def rename_start(client, message):
                 self.data = f"upload#{u_type}"
                 self.from_user = usr
                 
-        processing_msg = await message.reply("`Processing...`", reply_to_message_id=message.id)
+        processing_msg = await message.reply("`Please Wait...`", reply_to_message_id=message.id)
         processing_msg.reply_to_message = message
         
         actual_type = "document" if upload_type == "doc" else "video"
