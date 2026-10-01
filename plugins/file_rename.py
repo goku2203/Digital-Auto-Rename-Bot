@@ -191,7 +191,7 @@ async def upload_doc(bot, update):
     if not new_name.endswith(f".{info['extension']}"):
         new_name += f".{info['extension']}"
         
-    new_filename = new_name.replace('_', ' ')
+    new_filename = new_name
         
     # File paths for download
     file_path = f"Renames/{new_filename}"
