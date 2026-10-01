@@ -70,22 +70,17 @@ class Config(object):
 
 class rkn(object):
     # part of text configuration
-    START_TXT = """<b>✨ 𝙃𝙖𝙞 {}! 👋
+    START_TXT = """<b>Hi {} 👋
 
-🎌 𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝙩𝙤 𝙍𝙚𝙣𝙖𝙢𝙚 𝘽𝙤𝙩
+    Welcome to the Advanced Rename Bot! 🚀
+    
+    What I can do:
+    • Rename your files easily 📁
+    • Change or add custom thumbnails 🖼️
+    • Convert Video to File & File to Video 🔄
+    • Set custom captions for your files 📝
 
-⚡ 𝙒𝙝𝙖𝙩 𝙄 𝘾𝙖𝙣 𝘿𝙤:
-
-📁 𝙍𝙚𝙣𝙖𝙢𝙚 𝙁𝙞𝙡𝙚𝙨
-🖼️ 𝘾𝙝𝙖𝙣𝙜𝙚 𝙏𝙝𝙪𝙢𝙗𝙣𝙖𝙞𝙡
-🎬 𝙑𝙞𝙙𝙚𝙤 ➜ 𝙁𝙞𝙡𝙚
-📦 𝙁𝙞𝙡𝙚 ➜ 𝙑𝙞𝙙𝙚𝙤
-✏️ 𝘾𝙪𝙨𝙩𝙤𝙢 𝘾𝙖𝙥𝙩𝙞𝙤𝙣
-🎨 𝘾𝙪𝙨𝙩𝙤𝙢 𝙏𝙝𝙪𝙢𝙗𝙣𝙖𝙞𝙡
-
-🌸 𝙎𝙞𝙢𝙥𝙡𝙚 • 𝙁𝙖𝙨𝙩 • 𝙋𝙤𝙬𝙚𝙧𝙛𝙪𝙡
-
-💫 𝘾𝙧𝙚𝙖𝙩𝙚𝙙 𝙗𝙮: @Goku_Stark</b>"""
+    Created By : @Goku_Stark 💞</b>"""
 
     ABOUT_TXT = """<b>╭───────────⍟
 ├🤖 ᴍy ɴᴀᴍᴇ : {}
