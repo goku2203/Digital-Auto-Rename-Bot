@@ -141,7 +141,13 @@ class Database:
         """Get user's rename format template"""
         user = await self.col.find_one({"_id": int(user_id)})
         return user.get("format_template") if user else None
-    
+
+    async def set_upload_type(self, id, upload_type):
+        await self.col.update_one({'_id': int(id)}, {'$set': {'upload_type': upload_type}})
+
+    async def get_upload_type(self, id):
+        user = await self.col.find_one({'_id': int(id)})
+        return user.get('upload_type', None) if user else None
     
 digital_botz = Database(Config.DB_URL, Config.DB_NAME)
 
