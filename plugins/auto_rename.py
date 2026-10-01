@@ -63,20 +63,30 @@ class EnhancedAutoRenamer:
             'extension': Path(filename).suffix.lstrip('.')
         }
         
-        # Clean filename for parsing
-        clean_name = filename.replace('_', ' ')
+        # Clean filename for parsing (keep underscores for now to handle usernames like @anime_love9)
+        clean_name = filename.replace('.', ' ')
         
-        # First, remove website tags like [HindiAnimeZone], www.xyz.com, @channel
-        clean_name = re.sub(r'^\[.*?\]\s*|^\(.*?\)\s*|^@\w+\s*', '', clean_name)
-        clean_name = re.sub(r'^(?:www\.)?[a-zA-Z0-9-]+\.(?:com|net|org|in|cc|site|bz)\s*', '', clean_name, flags=re.IGNORECASE)
+        # Forcefully remove ANY variation of common website names/tags
+        junk_patterns = [
+            r'\[.*?\]\s*',  # Remove anything in brackets like [HindiAnimeZone.com]
+            r'\(.*?\)\s*',  # Remove anything in parentheses
+            r'(?i)HindiAnimeZone\s*(?:Com)?\s*', # Specific fix for HindiAnimeZone
+            r'(?i)toonworld4all\s*(?:Com)?\s*',  # Specific fix for toonworld4all
+            r'(?i)(?:www\s*)?[a-zA-Z0-9-]+\s*(?:com|net|org|in|cc|site|bz)\s*' # General website names
+        ]
         
-        # Now remove dots for safe parsing
-        clean_name = clean_name.replace('.', ' ')
+        for pattern in junk_patterns:
+            clean_name = re.sub(pattern, '', clean_name)
+
+        # Clean up any leftover messy spacing
+        clean_name = re.sub(r'\s+', ' ', clean_name).strip()
         
-        # Title extraction (before year or quality)
-        title_match = re.search(r'^([A-Za-z0-9\s\.\-]+?)(?=\s*[\(\[]?\d{4}[\)\]]?|\s*\d{3,4}p|\s*[Ss]\d)', clean_name, re.IGNORECASE)
+        # Title extraction (before year, quality, or season/episode)
+        title_match = re.search(r'^([A-Za-z0-9\s\.\-_]+?)(?=\s*\d{4}|\s*\d{3,4}p|\s*[Ss]\d)', clean_name, re.IGNORECASE)
+        
         if title_match:
-            info['title'] = self._clean_title(title_match.group(1))
+            extracted_title = title_match.group(1).strip()
+            info['title'] = extracted_title
         
         # Year extraction
         year_match = re.search(r'[\(\[]?(\d{4})[\)\]]?', clean_name)
