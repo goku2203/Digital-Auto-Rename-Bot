@@ -63,18 +63,31 @@ class EnhancedAutoRenamer:
             'extension': Path(filename).suffix.lstrip('.')
         }
         
-        # 1. First, box [] and () kulla irukkura tags ah full aaga remove pandrom
-        clean_name = re.sub(r'\[.*?\]|\(.*?\)', '', filename)
-        
-        # 2. @username matrum .com/.net mathiri varum generic website names ah remove pandrom
+        # 1. Remove ONLY leading release/source boxes like [HindiAnimeZone.com]
+        #    Do not remove normal (...) content from anywhere else.
+        clean_name = re.sub(r'^\s*(?:\[[^\]]*\]|\([^\)]*\))\s*', '', filename)
+
+        # 2. Remove leading website/source prefix if it appears before the real title.
+        #    Examples:
+        #      [HindiAnimeZone.com] Liar Game ...
+        #      HindiAnimeZone.com - Liar Game ...
+        clean_name = re.sub(
+            r'^\s*(?:[a-zA-Z0-9-]+\.)?(?:com|net|org|in|cc|site|bz)\S*\s*(?:[-|:]+\s*)?',
+            '',
+            clean_name,
+            flags=re.IGNORECASE
+        )
+
+        # 3. Remove @username tags automatically from the source filename.
+        #    This keeps your metadata title @anime_love9, but removes usernames
+        #    from the actual output filename.
         clean_name = re.sub(r'@[a-zA-Z0-9_]+', '', clean_name)
-        clean_name = re.sub(r'(?i)[a-z0-9-]+\.(?:com|net|org|in|cc|site|bz)', '', clean_name)
-        
-        # 3. Ippo Dots (.) and Underscore (_) ah space ah maathitu extra space ah clean pandrom
+
+        # 4. Replace dots/underscores with spaces and normalize whitespace.
         clean_name = clean_name.replace('.', ' ').replace('_', ' ')
         clean_name = re.sub(r'\s+', ' ', clean_name).strip()
-        
-        # 4. Title ah mattum theliva edukkurom (S01, Year, Quality kku munnadi varai)
+
+        # 5. Title is everything before year/quality/season.
         title_match = re.search(r'^(.+?)(?=\s*(?:19|20)\d{2}|\s*\d{3,4}p|\s*S\d{1,2}|\s*Season)', clean_name, re.IGNORECASE)
         
         if title_match:
