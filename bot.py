@@ -29,7 +29,6 @@ Repo Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot
 License Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot/blob/main/LICENSE
 """
 
-# extra imports
 import aiohttp, asyncio, warnings, pytz, datetime
 import logging
 import logging.config
@@ -37,12 +36,10 @@ import glob, sys
 import importlib.util
 from pathlib import Path
 
-# pyrogram imports
 from pyrogram import Client, __version__, errors
 from pyrogram.raw.all import layer
 from pyrogram import idle
 
-# bots imports
 from config import Config
 from plugins.web_support import web_server
 from plugins.file_rename import app
@@ -61,7 +58,6 @@ class DigitalAutoRenameBot(Client):
             api_hash=Config.API_HASH,
             bot_token=Config.BOT_TOKEN,
             workers=200,
-            plugins={"root": "plugins"},
             sleep_threshold=5,
             max_concurrent_transmissions=50
         )
@@ -83,8 +79,8 @@ class DigitalAutoRenameBot(Client):
 
         path = "plugins/*.py"
         files = sorted(glob.glob(path))
-        # file_rename.py and auto_rename.py are already imported above through
-        # file_rename.app. Loading them again registers duplicate handlers.
+        # These two are already imported through file_rename.app.
+        # Loading them again would register duplicate handlers.
         skip_plugins = {"file_rename", "auto_rename"}
         for name in files:
             with open(name) as a:
@@ -106,7 +102,7 @@ class DigitalAutoRenameBot(Client):
         for id in Config.ADMIN:
             if Config.STRING_SESSION:
                 try:
-                    await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬ᴜᴘᴘᴏʀᴛs 𝟐𝐆𝐁+ 𝐟𝐢𝐥ᴇs.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")
+                    await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬ᴜᴘᴘᴏʀᴛs 𝟐𝐆𝐁+ 𝐟ɪʟᴇs.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")
                 except:
                     pass
             else:
