@@ -79,11 +79,29 @@ async def rename_start(client, message):
     dcid = FileId.decode(rkn_file.file_id).dc_id
     extension_type = mime_type.split('/')[0]
     
+    upload_type = await digital_botz.get_upload_type(user_id)
+    if upload_type:
+        class DummyUpdate:
+            def __init__(self, msg, usr, u_type):
+                self.message = msg
+                self.data = f"upload#{u_type}"
+                self.from_user = usr
+                
+        processing_msg = await message.reply("`Processing...`", reply_to_message_id=message.id)
+        processing_msg.reply_to_message = message
+        
+        actual_type = "document" if upload_type == "doc" else "video"
+        dummy_update = DummyUpdate(processing_msg, message.from_user, actual_type)
+        
+        await upload_doc(client, dummy_update)
+        return
+
     button = [[InlineKeyboardButton("📁 Dᴏᴄᴜᴍᴇɴᴛ",callback_data = "upload#document")]]
     if message.media in [MessageMediaType.VIDEO, MessageMediaType.DOCUMENT]:
         button.append([InlineKeyboardButton("🎥 Vɪᴅᴇᴏ", callback_data = "upload#video")])
     elif message.media == MessageMediaType.AUDIO:
         button.append([InlineKeyboardButton("🎵 Aᴜᴅɪᴏ", callback_data = "upload#audio")])
+        
     await message.reply(
             text=f"**Sᴇʟᴇᴄᴛ Tʜᴇ Oᴜᴛᴩᴜᴛ Fɪʟᴇ Tyᴩᴇ**\n\n**__ᴍᴇᴅɪᴀ ɪɴꜰᴏ:\n\n◈ ᴏʟᴅ ꜰɪʟᴇ ɴᴀᴍᴇ: `{filename}`\n\n◈ ᴇxᴛᴇɴꜱɪᴏɴ: `{extension_type.upper()}`\n◈ ꜰɪʟᴇ ꜱɪᴢᴇ: `{filesize}`\n◈ ᴍɪᴍᴇ ᴛʏᴇᴩ: `{mime_type}`\n◈ ᴅᴄ ɪᴅ: `{dcid}`....__**",        
             reply_to_message_id=message.id,
