@@ -59,27 +59,23 @@ class EnhancedAutoRenamer:
 
     @classmethod
     def _clean_source_filename(cls, filename: str) -> tuple:
-        """Remove ONLY the leading [box] / @username / domain. Middle/end untouched."""
         base, extension = cls._split_ext(filename)
-        base = re.sub(r"[\u200b-\u200f\u202a-\u202e\ufeff]", "", base)
 
-        for _ in range(8):
-            old = base
-            base = RE_BOX.sub("", base)
-            base = cls._strip_keep_tag(base)
-            base = RE_DOMAIN.sub("", base)
-            base = RE_DOMAIN_SPACED.sub("", base)
-
-            # other @username: only strip if something is still left after it
-            m = RE_USER.match(base)
-            if m and base[m.end():].strip():
-                base = base[m.end():]
-            if base == old:
-                break
-
-        # underscores / dots -> spaces (extension already separated)
+        # 1. Telegram brackets ah underscore ah mathinalum, atha first space ah mathurom
         base = base.replace("_", " ").replace(".", " ")
+
+        # 2. Known junk words (Brackets illama vanthalum kandupudichu remove panna)
+        junk_words = [r"Tamil TV Toons", r"HindiAnimeZone", r"ToonWorld4All", r"com", r"net", r"org", r"site"]
+        for word in junk_words:
+            base = re.sub(rf"(?i)\b{word}\b", "", base)
+
+        # 3. Normal brackets & @usernames remove panna
+        base = re.sub(r"\[.*?\]|\(.*?\)", "", base)
+        base = re.sub(r"@[a-zA-Z0-9_]+", "", base)
+
+        # 4. Extra spaces ah clean panna
         base = re.sub(r"\s+", " ", base).strip(" -|:")
+        
         return base, extension
 
     def extract_all_info(self, filename: str) -> Dict:
