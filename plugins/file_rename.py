@@ -116,36 +116,37 @@ async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption,
     - Handles document, video, and audio files
     """
     try:
-        # Check if file exists
         if not os.path.exists(file_path):
             return None, f"File not found: {file_path}"
             
-        # Upload document files (2GB & 4GB)
+        real_filename = os.path.basename(file_path)
+            
         if upload_type == "document":
             filw = await bot.send_document(
                 sender_id,
                 document=file_path,
+                file_name=real_filename,
                 thumb=ph_path,
                 caption=caption,
                 progress=progress_for_pyrogram,
                 progress_args=(UPLOAD_TEXT, rkn_processing, time.time()))
         
-        # Upload video files (2GB & 4GB)  
         elif upload_type == "video":
             filw = await bot.send_video(
                 sender_id,
                 video=file_path,
+                file_name=real_filename,
                 caption=caption,
                 thumb=ph_path,
                 duration=duration,
                 progress=progress_for_pyrogram,
                 progress_args=(UPLOAD_TEXT, rkn_processing, time.time()))
         
-        # Upload audio files (2GB & 4GB)
         elif upload_type == "audio":
             filw = await bot.send_audio(
                 sender_id,
                 audio=file_path,
+                file_name=real_filename,
                 caption=caption,
                 thumb=ph_path,
                 duration=duration,
@@ -154,7 +155,6 @@ async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption,
         else:
             return None, f"Unknown upload type: {upload_type}"
         
-        # Return uploaded file object
         return filw, None
         
     except Exception as e:
