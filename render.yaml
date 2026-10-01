@@ -5,9 +5,9 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: python3 bot.py
-    repo: https://github.com/DigitalBotz/Digital-test.git
+    repo: https://github.com/goku2203/Digital-Auto-Rename-Bot/tree/main
     branch: main
-    autoDeploy: false
+    autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
