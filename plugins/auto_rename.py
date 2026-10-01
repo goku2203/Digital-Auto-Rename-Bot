@@ -33,7 +33,8 @@ RE_DOMAIN = re.compile(
     re.IGNORECASE,
 )
 # already-spaced domain: "HindiAnimeZone com Liar Game"
-RE_DOMAIN_SPACED = re.compile(r"^\s*[A-Za-z0-9\-]+\s+com(?=\s)\s*", re.IGNORECASE)
+# already-spaced or underscored domain: "HindiAnimeZone com" or "HindiAnimeZone_com"
+RE_DOMAIN_SPACED = re.compile(rf"^\s*[A-Za-z0-9\-]+[\s_]+(?:{_TLDS})(?=[\s_\-.|:\]\)]|$)\s*[\s_\-.|:]*\s*", re.IGNORECASE)
 # other @username (space / - | : after it). Underscore-joined names handled below
 RE_USER = re.compile(r"^\s*@[A-Za-z0-9_]{2,32}?(?=[\s\-|:]|$)\s*[\-|:]*\s*")
 
