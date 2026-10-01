@@ -205,8 +205,11 @@ async def upload_doc(bot, update):
     await rkn_processing.edit("`Adding Metadata...`")
     out_path = f"Renames/meta_{new_filename}"
     
-    clean_meta_name = new_filename.replace('"', "'")
-    cmd = f'ffmpeg -y -i "{file_path}" -c copy -map 0 -metadata title="{clean_meta_name}" -metadata:s:v title="{clean_meta_name}" -metadata:s:a title="{clean_meta_name}" "{out_path}"'
+    # Using your specific username for ALL metadata titles instead of the full filename
+    custom_metadata_title = "@anime_love9"
+    
+    cmd = f'ffmpeg -y -i "{file_path}" -c copy -map 0 -metadata title="{custom_metadata_title}" -metadata:s:v title="{custom_metadata_title}" -metadata:s:a title="{custom_metadata_title}" -metadata:s:s title="{custom_metadata_title}" "{out_path}"'
+    
     proc = await asyncio.create_subprocess_shell(cmd)
     await proc.communicate()
     
