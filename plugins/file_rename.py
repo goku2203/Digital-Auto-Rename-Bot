@@ -242,19 +242,30 @@ async def upload_doc(bot, update):
     # Extract information
     info = renamer.extract_all_info(media.file_name)
 
-    user_data = await digital_botz.get_user_data(user_id)
-    format_template = user_data.get('format_template', "{filename}")
-    if format_template is None:
-        format_template = "{filename}"
-    
-    # Apply user's format template
-    new_name = renamer.apply_format_template(info, format_template)
-    
-    # Add extension if not present
-    if not new_name.endswith(f".{info['extension']}"):
-        new_name += f".{info['extension']}"
-        
-    new_filename = new_name
+    user_data = await digital_botz.get_user_data(user_id) or {}
+    rename_mode = await digital_botz.get_rename_mode(user_id)
+
+    if rename_mode == "manual":
+        # Manual mode uses the filename supplied by the user.
+        new_filename = (update.message.text or "").strip()
+        if not new_filename:
+            return await rkn_processing.edit("❌ Filename is empty. Please try again.")
+
+        if not os.path.splitext(new_filename)[1]:
+            original_ext = os.path.splitext(media.file_name)[1]
+            if original_ext:
+                new_filename += original_ext
+    else:
+        format_template = user_data.get('format_template', "{filename}")
+        if format_template is None:
+            format_template = "{filename}"
+
+        # Apply user's saved auto format.
+        new_filename = renamer.apply_format_template(info, format_template)
+
+        # Add extension if not present.
+        if not new_filename.endswith(f".{info['extension']}"):
+            new_filename += f".{info['extension']}"
     print(f"[RENAME-DEBUG] raw={media.file_name!r} -> new={new_filename!r}")
         
     # File paths for download
@@ -326,8 +337,6 @@ async def upload_doc(bot, update):
              print(f"Error processing thumbnail: {e}")
              ph_path = None
 
-    upload_type = update.data.split("#")[1]
-    
     # Use the correct file path based on metadata mode
     final_file_path = file_path    
     if media.file_size > 2000 * 1024 * 1024:
