@@ -3,6 +3,32 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from helper.database import digital_botz
 
 
+def mode_keyboard():
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🤖 Auto", callback_data="mode_auto"),
+            InlineKeyboardButton("✍️ Manual", callback_data="mode_manual")
+        ],
+        [InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]
+    ])
+
+
+async def show_mode(message, user_id):
+    current_mode = await digital_botz.get_rename_mode(user_id)
+    mode_text = "AUTO ✅" if current_mode == "auto" else "MANUAL ✅"
+    await message.reply_text(
+        f"⚙️ **Rename Mode Settings**\n\n"
+        f"Current Mode: **{mode_text}**\n\n"
+        "Choose how the bot should handle incoming files.",
+        reply_markup=mode_keyboard()
+    )
+
+
+@Client.on_message(filters.private & filters.command("mode"))
+async def mode_command(client, message):
+    await show_mode(message, message.from_user.id)
+
+
 @Client.on_message(filters.private & filters.command("settings"))
 async def settings_command(client, message):
     user_id = message.from_user.id
