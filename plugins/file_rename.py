@@ -162,7 +162,9 @@ async def upload_doc(bot, update):
     info = renamer.extract_all_info(media.file_name)
 
     user_data = await digital_botz.get_user_data(user_id)
-    format_template = user_data.get('format_template', None)
+    format_template = user_data.get('format_template', "{filename}")
+    if format_template is None:
+        format_template = "{filename}"
     
     # Apply user's format template
     new_name = renamer.apply_format_template(info, format_template)
@@ -182,6 +184,17 @@ async def upload_doc(bot, update):
     except Exception as e:        
         return await rkn_processing.edit(f"Download Error: {e}")
     
+    await rkn_processing.edit("`Adding Metadata...`")
+    out_path = f"Renames/meta_{new_filename}"
+    cmd = f'ffmpeg -y -i "{file_path}" -map 0 -c copy -metadata title="{new_filename}" -metadata author="@Goku_Stark" "{out_path}"'
+    proc = await asyncio.create_subprocess_shell(cmd)
+    await proc.communicate()
+    
+    if os.path.exists(out_path):
+        os.remove(file_path)
+        file_path = out_path
+        final_file_path = out_path
+
     await rkn_processing.edit("`Try To Uploading....`")        
     duration = 0
     try:
