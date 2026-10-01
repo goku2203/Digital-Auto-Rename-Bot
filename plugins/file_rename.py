@@ -192,6 +192,7 @@ async def upload_doc(bot, update):
         new_name += f".{info['extension']}"
         
     new_filename = new_name
+    print(f"[RENAME-DEBUG] raw={media.file_name!r} -> new={new_filename!r}")
         
     # File paths for download
     file_path = f"Renames/{new_filename}"
