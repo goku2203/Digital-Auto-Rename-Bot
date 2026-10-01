@@ -63,20 +63,18 @@ class EnhancedAutoRenamer:
             'extension': Path(filename).suffix.lstrip('.')
         }
         
-        # 1. First remove bracket words like [HindiAnimeZone.com] completely
-        clean_name = re.sub(r'\[.*?\]', '', filename)
+        # 1. First, box [] and () kulla irukkura tags ah full aaga remove pandrom
+        clean_name = re.sub(r'\[.*?\]|\(.*?\)', '', filename)
         
-        # 2. Remove any other website names ending with .com, .net, etc.
+        # 2. @username matrum .com/.net mathiri varum generic website names ah remove pandrom
+        clean_name = re.sub(r'@[a-zA-Z0-9_]+', '', clean_name)
         clean_name = re.sub(r'(?i)[a-z0-9-]+\.(?:com|net|org|in|cc|site|bz)', '', clean_name)
         
-        # 3. Remove @usernames if any in original name (to avoid duplicate tags)
-        clean_name = re.sub(r'@[a-zA-Z0-9_]+', '', clean_name)
-        
-        # 4. Now replace dots and underscores with space for a clean title
+        # 3. Ippo Dots (.) and Underscore (_) ah space ah maathitu extra space ah clean pandrom
         clean_name = clean_name.replace('.', ' ').replace('_', ' ')
         clean_name = re.sub(r'\s+', ' ', clean_name).strip()
         
-        # 5. Extract only the Title (Stop exactly before S01, Year, or Quality)
+        # 4. Title ah mattum theliva edukkurom (S01, Year, Quality kku munnadi varai)
         title_match = re.search(r'^(.+?)(?=\s*(?:19|20)\d{2}|\s*\d{3,4}p|\s*S\d{1,2}|\s*Season)', clean_name, re.IGNORECASE)
         
         if title_match:
