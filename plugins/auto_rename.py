@@ -28,13 +28,10 @@ License Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot/blob/main/
 """
 
 import re
-import os
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from datetime import datetime
-import asyncio
 from helper.database import digital_botz
 
 
@@ -44,17 +41,12 @@ class EnhancedAutoRenamer:
 
     @staticmethod
     def _clean_source_filename(filename: str) -> tuple:
-        """Advanced filename cleaner.
-
-        Only removes unwanted prefixes from the START of the filename.
-        The actual title/content after the prefix is preserved.
-        """
+        """Advanced filename cleaner: only clean unwanted prefixes at START."""
         path = Path(filename)
         extension = path.suffix.lstrip('.')
         base = path.stem
 
-        # Remove multiple leading release/source boxes.
-        # Example: [HindiAnimeZone.com] (Official) Liar Game...
+        # Remove leading [box] / (box) tags. Repeat for stacked prefixes.
         for _ in range(5):
             old_base = base
 
@@ -64,17 +56,14 @@ class EnhancedAutoRenamer:
                 base
             )
 
-            # Remove a leading @username/source tag only when it is at the start.
-            # This prevents usernames inside the actual title from being touched.
+            # Remove leading @username/source tag only.
             base = re.sub(
                 r'^\s*@[A-Za-z0-9_]{2,32}(?=\s|[_\-.|:]|$)\s*[_\-.|:]*\s*',
                 '',
                 base
             )
 
-            # Remove a leading website/domain source.
-            # Handles: HindiAnimeZone.com, www.HindiAnimeZone.com,
-            # https://HindiAnimeZone.com, HindiAnimeZone.net, etc.
+            # Remove leading website/domain source only.
             base = re.sub(
                 r'^\s*(?:(?:https?://)?(?:www\.)?)?[A-Za-z0-9][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*\.(?:com|net|org|in|cc|site|bz)\b\s*[_\-.|:]*\s*',
                 '',
@@ -85,15 +74,15 @@ class EnhancedAutoRenamer:
             if base == old_base:
                 break
 
-        # Convert dots/underscores in the filename body to spaces.
-        # Keep the file extension separate so .mkv remains .mkv.
+        # Convert dots and underscores in filename BODY to spaces.
+        # Extension is protected because it was separated above.
         base = base.replace('_', ' ').replace('.', ' ')
         base = re.sub(r'\s+', ' ', base).strip()
 
         return base, extension
 
     def extract_all_info(self, filename: str) -> Dict:
-        """Extract all possible information from a cleaned filename."""
+        """Extract information from a cleaned filename."""
         cleaned_base, extension = self._clean_source_filename(filename)
 
         info = {
@@ -109,16 +98,13 @@ class EnhancedAutoRenamer:
             'bit_depth': '',
             'hdr': '',
             'release_group': '',
-            # IMPORTANT: {filename}/{original} now uses the cleaned filename,
-            # not the original source filename.
             'original_name': cleaned_base,
             'extension': extension
         }
 
         clean_name = cleaned_base
 
-        # Title = only the name before S01 / Season / year / quality.
-        # This makes the title stay correctly before the season marker.
+        # Title is ONLY the name before S01/S01E01/Season/year/quality.
         title_match = re.search(
             r'^(.+?)(?=\s*(?:19|20)\d{2}|\s*\d{3,4}p|\s*S\d{1,2}(?:E|EP)?\d{0,3}\b|\s*Season\s*\d+)',
             clean_name,
@@ -130,12 +116,11 @@ class EnhancedAutoRenamer:
         else:
             info['title'] = clean_name.strip()
 
-        # Year extraction
         year_match = re.search(r'\b(19|20)\d{2}\b', clean_name)
         if year_match:
             info['year'] = year_match.group(0)
 
-        # Season + Episode: S01E01 / S01EP01 / S1E1
+        # S01E01 / S01EP01 / S1E1
         s_e_match = re.search(r'\b[Ss](\d{1,2})[EePp]?(\d{1,3})\b', clean_name)
         if s_e_match:
             info['season'] = f"S{s_e_match.group(1).zfill(2)}"
@@ -150,36 +135,30 @@ class EnhancedAutoRenamer:
             if episode_match:
                 info['episode'] = f"E{episode_match.group(1).zfill(2)}"
 
-        # Quality extraction
         quality_match = re.search(r'(\d{3,4}p|4[Kk]|UHD|HD|SD|HDRip|WEBRip|BluRay)', clean_name, re.IGNORECASE)
         if quality_match:
             info['quality'] = quality_match.group(1).upper()
 
-        # Video codec
         codec_match = re.search(r'(x264|x265|HEVC|H\.264|H\.265|AVC)', clean_name, re.IGNORECASE)
         if codec_match:
             info['video_codec'] = codec_match.group(1).lower()
 
-        # Audio codec
         audio_match = re.search(r'(DD\+?5\.1|DDP?5\.1|DD5\.1|DD2\.0|AAC|AC3|DTS)', clean_name, re.IGNORECASE)
         if audio_match:
             info['audio_codec'] = audio_match.group(1).upper()
 
-        # Language detection
         languages = ['Hindi', 'English', 'Malayalam', 'Tamil', 'Telugu', 'Kannada', 'Dual']
         for lang in languages:
             if re.search(rf'\b{re.escape(lang)}\b', clean_name, re.IGNORECASE):
                 info['language'] = lang
                 break
 
-        # Source type
         sources = ['BluRay', 'WEBRip', 'WEB-DL', 'HDRip', 'DVDRip', 'TVRip', 'AMZN', 'Netflix', 'Hotstar']
         for source in sources:
             if re.search(re.escape(source), clean_name, re.IGNORECASE):
                 info['source'] = source
                 break
 
-        # Bit depth and HDR
         if re.search(r'\b10bit\b', clean_name, re.IGNORECASE):
             info['bit_depth'] = '10bit'
         if re.search(r'\bhdr\b', clean_name, re.IGNORECASE):
@@ -195,33 +174,30 @@ class EnhancedAutoRenamer:
 
     @staticmethod
     def _normalize_output_name(filename: str) -> str:
-        """Normalize final filename while preserving @username underscores and extension."""
+        """Remove output underscores/dots while preserving @username underscores."""
         path = Path(filename)
         extension = path.suffix
         stem = path.stem
 
-        # Protect @usernames such as @anime_love9 before removing underscores.
-        protected = {}
+        # Protect underscores INSIDE @username, e.g. @anime_love9.
+        # A temporary character is used instead of a placeholder containing _. 
+        stem = re.sub(
+            r'@[A-Za-z0-9_]{2,32}',
+            lambda m: m.group(0).replace('_', '§'),
+            stem
+        )
 
-        def protect_username(match):
-            key = f"__USERNAME_{len(protected)}__"
-            protected[key] = match.group(0)
-            return key
-
-        stem = re.sub(r'@[A-Za-z0-9_]{2,32}', protect_username, stem)
-
-        # Filename separators become normal spaces.
+        # All normal filename separators become spaces.
         stem = stem.replace('_', ' ').replace('.', ' ')
         stem = re.sub(r'\s+', ' ', stem).strip()
 
-        # Restore usernames exactly.
-        for key, username in protected.items():
-            stem = stem.replace(key, username)
+        # Restore username underscores.
+        stem = stem.replace('§', '_')
 
         return f"{stem}{extension}"
 
     def apply_format_template(self, info: Dict, template: str) -> str:
-        """Apply user's format template and normalize filename spacing."""
+        """Apply user's format template and keep filename/caption spacing clean."""
         placeholders = {
             '{title}': info.get('title', ''),
             '{year}': info.get('year', ''),
@@ -246,7 +222,8 @@ class EnhancedAutoRenamer:
         template = re.sub(r'\(\s*\)', '', template)
         template = re.sub(r'\[\s*\]', '', template)
 
-        # Final cleanup. Underscores/dots are spaces, but @anime_love9 stays intact.
+        # Final filename cleanup. This same new_filename is used by the caption,
+        # so Telegram filename and caption stay identical and properly spaced.
         template = self._normalize_output_name(template)
         template = re.sub(r'\s+', ' ', template).strip()
 
@@ -303,10 +280,7 @@ async def set_format_command(client: Client, message: Message):
             ]
         ]
 
-        await message.reply_text(
-            reply_text,
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
+        await message.reply_text(reply_text, reply_markup=InlineKeyboardMarkup(buttons))
         return
 
     format_template = " ".join(message.command[1:])
