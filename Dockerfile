@@ -1,5 +1,9 @@
 # Use the official Python image
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-bullseye
+
+RUN apt-get update -qq && apt-get -y install ffmpeg
+
+# Set the working directory in the container
 
 RUN apt-get update -qq && apt-get -y install ffmpeg
 
