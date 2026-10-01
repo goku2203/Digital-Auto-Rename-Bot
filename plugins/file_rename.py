@@ -153,6 +153,8 @@ async def upload_doc(bot, update):
 
     # msg file location 
     file = update.message.reply_to_message
+    if not file:
+        return await rkn_processing.edit("Error: Original file message is missing or deleted! Please resend the file.")
     media = getattr(file, file.media.value)
 
     
