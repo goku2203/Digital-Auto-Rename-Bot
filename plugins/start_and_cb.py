@@ -80,6 +80,51 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup = InlineKeyboardMarkup(start_button))
         
+    elif data == "mode":
+        current_mode = await digital_botz.get_rename_mode(query.from_user.id)
+        mode_text = "AUTO ✅" if current_mode == "auto" else "MANUAL ✅"
+        await query.message.edit_text(
+            f"⚙️ **Rename Mode Settings**\\n\\nCurrent Mode: **{mode_text}**\\n\\nChoose how the bot should handle incoming files.",
+            reply_markup=InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton("🤖 Auto", callback_data="mode_auto"),
+                    InlineKeyboardButton("✍️ Manual", callback_data="mode_manual")
+                ],
+                [InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]
+            ])
+        )
+        await query.answer()
+
+    elif data == "mode_auto":
+        await digital_botz.set_rename_mode(query.from_user.id, "auto")
+        await query.message.edit_text(
+            "✅ **Auto Mode Enabled**\\n\\nIncoming files will use your saved auto-rename format.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]])
+        )
+        await query.answer("Auto mode saved ✅")
+
+    elif data == "mode_manual":
+        await digital_botz.set_rename_mode(query.from_user.id, "manual")
+        await query.message.edit_text(
+            "✅ **Manual Mode Enabled**\\n\\nIncoming files will ask you for the new filename.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]])
+        )
+        await query.answer("Manual mode saved ✅")
+
+    elif data == "mode_manual_rename":
+        await query.message.edit_text(
+            "✍️ **Manual Rename**\\n\\nReply to this message with the new filename.\\n\\nExample: `One Piece - 01.mkv`",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]])
+        )
+        await query.answer()
+
+    elif data == "mode_cancel":
+        try:
+            await query.message.delete()
+        except:
+            pass
+        await query.answer()
+
     elif data == "help":
         await query.message.edit_text(
             text=rkn.HELP_TXT,
