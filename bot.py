@@ -47,13 +47,10 @@ from config import Config
 from plugins.web_support import web_server
 from plugins.file_rename import app
 
-# Get logging configurations
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler('BotLog.txt'),
-             logging.StreamHandler()]
+    handlers=[logging.FileHandler('BotLog.txt'), logging.StreamHandler()]
 )
-#logger = logging.getLogger(__name__)
 logging.getLogger("pyrofork").setLevel(logging.WARNING)
 
 class DigitalAutoRenameBot(Client):
@@ -68,25 +65,25 @@ class DigitalAutoRenameBot(Client):
             sleep_threshold=5,
             max_concurrent_transmissions=50
         )
-                
-         
+
     async def start(self):
         await super().start()
         me = await self.get_me()
         self.mention = me.mention
-        self.username = me.username  
+        self.username = me.username
         self.uptime = Config.BOT_UPTIME
         self.premium = Config.PREMIUM_MODE
         self.uploadlimit = Config.UPLOAD_LIMIT_MODE
         Config.BOT = self
-        
+
         app = aiohttp.web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
         await aiohttp.web.TCPSite(app, bind_address, Config.PORT).start()
-        
+
         path = "plugins/*.py"
-        files = glob.glob(path)
+        # Stable alphabetical loading ensures zzz_* compatibility patches load last.
+        files = sorted(glob.glob(path))
         for name in files:
             with open(name) as a:
                 patt = Path(a.name)
@@ -98,32 +95,36 @@ class DigitalAutoRenameBot(Client):
                 spec.loader.exec_module(load)
                 sys.modules["plugins" + plugin_name] = load
                 print("Digital Botz Imported " + plugin_name)
-                
+
         print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
-        
         for id in Config.ADMIN:
             if Config.STRING_SESSION:
-                try: await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬𝐮𝐩𝐩𝐨𝐫𝐭𝐬 𝟐𝐆𝐁+ 𝐟𝐢𝐥𝐞𝐬.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
-                except: pass
+                try:
+                    await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬𝐮𝐩𝐩𝐨𝐫𝐭𝐬 𝟐𝐆𝐁+ 𝐟𝐢𝐥𝐞𝐬.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")
+                except:
+                    pass
             else:
-                try: await self.send_message(id, f"𝟮𝗚𝗕- ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
-                except: pass
-                    
+                try:
+                    await self.send_message(id, f"𝟮𝗚𝗕- ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")
+                except:
+                    pass
+
         if Config.LOG_CHANNEL:
             try:
                 curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
                 date = curr.strftime('%d %B, %Y')
                 time = curr.strftime('%I:%M:%S %p')
-                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`</b>")                                
+                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`</b>")
             except:
-                print("Pʟᴇᴀꜱᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
+                print("Pʟᴇᴀsᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
 
     async def stop(self, *args):
         for id in Config.ADMIN:
-            try: await self.send_message(id, f"**Bot Stopped....**")                                
-            except: pass
-                
+            try:
+                await self.send_message(id, f"**Bot Stopped....**")
+            except:
+                pass
         print("Bot Stopped 🙄")
         await super().stop()
 
@@ -136,11 +137,9 @@ def main():
             await asyncio.gather(app.start(), digital_instance.start())
         else:
             await asyncio.gather(digital_instance.start())
-        
-        # Idle mode start karo
+
         await idle()
-        
-        # Bot stop karo
+
         if Config.STRING_SESSION:
             await asyncio.gather(app.stop(), digital_instance.stop())
         else:
@@ -163,9 +162,8 @@ if __name__ == "__main__":
         asyncio.run(asyncio.sleep(ft.value))
         print("Now Ready For Deploying!")
         main()
-        
 
-# Rkn Developer 
+# Rkn Developer
 # Don't Remove Credit 😔
 # Telegram Channel @RknDeveloper & @Rkn_Botz
 # Developer @RknDeveloperr
