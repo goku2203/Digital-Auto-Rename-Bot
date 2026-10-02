@@ -39,6 +39,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceRepl
 # bots imports
 from helper.database import digital_botz
 from config import Config, rkn
+from bot_settings import BotSettings
 from helper.utils import humanbytes
 from plugins import __version__ as _bot_version_, __developer__, __database__, __library__, __language__, __programer__
 from plugins.file_rename import upload_doc
