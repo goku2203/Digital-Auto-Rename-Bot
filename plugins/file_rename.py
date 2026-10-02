@@ -285,6 +285,7 @@ async def upload_doc(bot, update, requested_name=None):
     await rkn_processing.edit("`Adding Metadata...`")
     os.makedirs("Renames", exist_ok=True)
     out_path = f"Renames/meta_{new_filename}"
+    final_file_path = file_path
     
     # Using your specific username for ALL metadata titles instead of the full filename
     custom_metadata_title = BotSettings.METADATA_TITLE
