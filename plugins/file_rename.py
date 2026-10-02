@@ -109,7 +109,7 @@ async def rename_start(client, message):
         processing_msg = await message.reply("`Please Wait...`", reply_to_message_id=message.id)
         processing_msg.reply_to_message = message
         
-        actual_type = "document" if upload_type == "doc" else "video"
+        actual_type = {"doc": "document", "document": "document", "video": "video", "audio": "audio"}.get(upload_type, "document")
         dummy_update = DummyUpdate(processing_msg, message.from_user, actual_type)
         
         await upload_doc(client, dummy_update)
@@ -228,6 +228,8 @@ renamer = EnhancedAutoRenamer()
 
 async def upload_doc(bot, update, requested_name=None):
     rkn_processing = await update.message.edit("`Processing...`")
+    raw_upload_type = getattr(update, "data", "upload#document").split("#", 1)[-1]
+    upload_type = {"doc": "document", "document": "document", "video": "video", "audio": "audio"}.get(raw_upload_type, "document")
         
     user_id = int(update.message.chat.id) 
     new_name = requested_name or update.message.text
