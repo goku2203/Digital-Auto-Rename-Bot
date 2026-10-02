@@ -45,7 +45,10 @@ logger.setLevel(logging.INFO)
 @Client.on_message(filters.command(["stats", "status"]) & filters.user(Config.ADMIN))
 async def get_stats(bot, message):
     total_users = await digital_botz.total_users_count()
-    total_premium_users = "Disabled ✅"
+    if bot.premium:
+        total_premium_users = await digital_botz.total_premium_users_count()
+    else:
+        total_premium_users = "Disabled ✅"
     uptime = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - bot.uptime))    
     start_t = time.time()
     rkn = await message.reply('**ᴘʀᴏᴄᴇssɪɴɢ.....**')    
@@ -170,7 +173,7 @@ async def _banned_users(_, m: Message):
     banned_usr_count = 0
     text = ''
     async for banned_user in all_banned_users:
-        user_id = banned_user['_id']
+        user_id = banned_user['id']
         ban_duration = banned_user['ban_status']['ban_duration']
         banned_on = banned_user['ban_status']['banned_on']
         ban_reason = banned_user['ban_status']['ban_reason']

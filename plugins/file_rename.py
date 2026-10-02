@@ -45,7 +45,6 @@ from PIL import Image
 from helper.utils import progress_for_pyrogram, convert, humanbytes, add_prefix_suffix, remove_path
 from helper.database import digital_botz
 from config import Config
-from bot_settings import BotSettings
 from plugins.auto_rename import EnhancedAutoRenamer
 
 # extra imports
@@ -79,26 +78,7 @@ async def rename_start(client, message):
     mime_type = rkn_file.mime_type
     dcid = FileId.decode(rkn_file.file_id).dc_id
     extension_type = mime_type.split('/')[0]
-
-    # User-selected rename mode is persistent in MongoDB.
-    rename_mode = await digital_botz.get_rename_mode(user_id)
-
-    # Manual mode: wait for the user to reply with the new filename.
-    if rename_mode == 'manual':
-        await message.reply(
-            text=(
-                f'✍️ **Manual Rename Mode**\n\n'
-                f'◈ Old File Name: `{filename}`\n'
-                f'◈ File Size: `{filesize}`\n\n'
-                'New file name-a reply pannunga.'
-            ),
-            reply_to_message_id=message.id,
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton('✖️ Cancel', callback_data='mode_cancel')]
-            ])
-        )
-        return
-
+    
     upload_type = await digital_botz.get_upload_type(user_id)
     if upload_type:
         class DummyUpdate:
@@ -110,7 +90,7 @@ async def rename_start(client, message):
         processing_msg = await message.reply("`Please Wait...`", reply_to_message_id=message.id)
         processing_msg.reply_to_message = message
         
-        actual_type = {"doc": "document", "document": "document", "video": "video", "audio": "audio"}.get(upload_type, "document")
+        actual_type = "document" if upload_type == "doc" else "video"
         dummy_update = DummyUpdate(processing_msg, message.from_user, actual_type)
         
         await upload_doc(client, dummy_update)
@@ -127,50 +107,6 @@ async def rename_start(client, message):
             reply_to_message_id=message.id,
             reply_markup=InlineKeyboardMarkup(button)
         )
-
-@Client.on_message(filters.private & filters.text)
-async def manual_rename_message(client, message):
-    if not message.reply_to_message or not message.text:
-        return
-
-    replied = message.reply_to_message
-    user_id = message.from_user.id
-    bot_user = await client.get_me()
-    if not replied.from_user or replied.from_user.id != bot_user.id:
-        return
-
-    original = replied.reply_to_message
-    if not original or not original.media:
-        return
-
-    if await digital_botz.get_rename_mode(user_id) != 'manual':
-        return
-
-    media = getattr(original, original.media.value, None)
-    if not media or not getattr(media, 'file_name', None):
-        return
-
-    requested_name = message.text.strip()
-    if not requested_name:
-        return
-
-    if not os.path.splitext(requested_name)[1]:
-        original_ext = os.path.splitext(media.file_name)[1]
-        if original_ext:
-            requested_name += original_ext
-
-    upload_type = await digital_botz.get_upload_type(user_id) or 'document'
-    processing_msg = await message.reply('`Processing...`', reply_to_message_id=message.id)
-    processing_msg.reply_to_message = original
-    processing_msg.text = requested_name
-
-    class DummyUpdate:
-        def __init__(self, msg, usr, u_type):
-            self.message = msg
-            self.data = f'upload#{u_type}'
-            self.from_user = usr
-
-    await upload_doc(client, DummyUpdate(processing_msg, message.from_user, upload_type), requested_name=requested_name)
 
 async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption, duration, rkn_processing):
     """
@@ -227,50 +163,35 @@ async def upload_files(bot, sender_id, upload_type, file_path, ph_path, caption,
 
 renamer = EnhancedAutoRenamer()
 
-async def upload_doc(bot, update, requested_name=None):
+async def upload_doc(bot, update):
     rkn_processing = await update.message.edit("`Processing...`")
-    raw_upload_type = getattr(update, "data", "upload#document").split("#", 1)[-1]
-    upload_type = {"doc": "document", "document": "document", "video": "video", "audio": "audio"}.get(raw_upload_type, "document")
         
     user_id = int(update.message.chat.id) 
-    new_name = requested_name or update.message.text
+    new_name = update.message.text
 
-    # Original incoming file message.
+    # msg file location 
     file = update.message.reply_to_message
-    if not file or not file.media:
+    if not file:
         return await rkn_processing.edit("Error: Original file message is missing or deleted! Please resend the file.")
-    media = getattr(file, file.media.value, None)
-    if not media or not getattr(media, "file_name", None):
-        return await rkn_processing.edit("Error: File information is missing. Please resend the file.")
+    media = getattr(file, file.media.value)
 
     
     # Extract information
     info = renamer.extract_all_info(media.file_name)
 
-    user_data = await digital_botz.get_user_data(user_id) or {}
-    rename_mode = await digital_botz.get_rename_mode(user_id)
-
-    if rename_mode == "manual":
-        # Manual mode uses the filename supplied by the user.
-        new_filename = (update.message.text or "").strip()
-        if not new_filename:
-            return await rkn_processing.edit("❌ Filename is empty. Please try again.")
-
-        if not os.path.splitext(new_filename)[1]:
-            original_ext = os.path.splitext(media.file_name)[1]
-            if original_ext:
-                new_filename += original_ext
-    else:
-        format_template = user_data.get('format_template', "{filename}")
-        if format_template is None:
-            format_template = "{filename}"
-
-        # Apply user's saved auto format.
-        new_filename = renamer.apply_format_template(info, format_template)
-
-        # Add extension if not present.
-        if info["extension"] and not new_filename.lower().endswith(f".{info['extension'].lower()}"):
-            new_filename += f".{info['extension']}"
+    user_data = await digital_botz.get_user_data(user_id)
+    format_template = user_data.get('format_template', "{filename}")
+    if format_template is None:
+        format_template = "{filename}"
+    
+    # Apply user's format template
+    new_name = renamer.apply_format_template(info, format_template)
+    
+    # Add extension if not present
+    if not new_name.endswith(f".{info['extension']}"):
+        new_name += f".{info['extension']}"
+        
+    new_filename = new_name
     print(f"[RENAME-DEBUG] raw={media.file_name!r} -> new={new_filename!r}")
         
     # File paths for download
@@ -283,19 +204,15 @@ async def upload_doc(bot, update, requested_name=None):
         return await rkn_processing.edit(f"Download Error: {e}")
     
     await rkn_processing.edit("`Adding Metadata...`")
-    os.makedirs("Renames", exist_ok=True)
     out_path = f"Renames/meta_{new_filename}"
-    final_file_path = file_path
     
     # Using your specific username for ALL metadata titles instead of the full filename
-    custom_metadata_title = BotSettings.METADATA_TITLE
+    custom_metadata_title = "@anime_love9"
     
     cmd = f'ffmpeg -y -i "{file_path}" -c copy -map 0 -metadata title="{custom_metadata_title}" -metadata:s:v title="{custom_metadata_title}" -metadata:s:a title="{custom_metadata_title}" -metadata:s:s title="{custom_metadata_title}" "{out_path}"'
     
     proc = await asyncio.create_subprocess_shell(cmd)
-    _, stderr = await proc.communicate()
-    if proc.returncode != 0:
-        print(f"[FFMPEG] metadata command failed: {stderr.decode(errors='ignore')[:1000] if stderr else 'unknown error'}")
+    await proc.communicate()
     
     if os.path.exists(out_path):
         os.remove(file_path)
@@ -306,7 +223,7 @@ async def upload_doc(bot, update, requested_name=None):
     await rkn_processing.edit("`Try To Uploading....`")        
     duration = 0
     try:
-        parser = createParser(final_file_path)
+        parser = createParser(file_path)
         metadata = extractMetadata(parser)
         if metadata and metadata.has("duration"):
             duration = metadata.get('duration').seconds
@@ -346,6 +263,10 @@ async def upload_doc(bot, update, requested_name=None):
              print(f"Error processing thumbnail: {e}")
              ph_path = None
 
+    upload_type = update.data.split("#")[1]
+    
+    # Use the correct file path based on metadata mode
+    final_file_path = file_path    
     if media.file_size > 2000 * 1024 * 1024:
         # Upload file using unified function for large files
         filw, error = await upload_files(
@@ -353,8 +274,8 @@ async def upload_doc(bot, update, requested_name=None):
             ph_path, caption, duration, rkn_processing
         )
 
-        if error:
-            await remove_path(ph_path, final_file_path, dl_path)
+        if error:            
+            await remove_path(ph_path, file_path, dl_path)
             return await rkn_processing.edit(f"Upload Error: {error}")
         
         from_chat = filw.chat.id
@@ -369,12 +290,12 @@ async def upload_doc(bot, update, requested_name=None):
             ph_path, caption, duration, rkn_processing
         )
                    
-        if error:
-            await remove_path(ph_path, final_file_path, dl_path)
+        if error:            
+            await remove_path(ph_path, file_path, dl_path)
             return await rkn_processing.edit(f"Upload Error: {error}")        
 
     # Clean up files
-    await remove_path(ph_path, final_file_path, dl_path)
+    await remove_path(ph_path, file_path, dl_path)
     return await rkn_processing.edit("Uploaded Successfully....")
 
 @Client.on_message(filters.private & filters.command("set_type"))

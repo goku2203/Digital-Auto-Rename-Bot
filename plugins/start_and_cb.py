@@ -39,7 +39,6 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceRepl
 # bots imports
 from helper.database import digital_botz
 from config import Config, rkn
-from bot_settings import BotSettings
 from helper.utils import humanbytes
 from plugins import __version__ as _bot_version_, __developer__, __database__, __library__, __language__, __programer__
 from plugins.file_rename import upload_doc
@@ -52,8 +51,7 @@ async def start(client, message):
         InlineKeyboardButton('Sᴜᴩᴩᴏʀ𝚃', url='https://t.me/DigitalBotz_Support')
         ],[
         InlineKeyboardButton('Aʙᴏυᴛ', callback_data='about'),
-        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help'),
-        InlineKeyboardButton('⚙️ Sᴇᴛᴛɪɴɢꜱ', callback_data='settings')
+        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help')       
          ]]
         
     
@@ -73,8 +71,7 @@ async def cb_handler(client, query: CallbackQuery):
         InlineKeyboardButton('Sᴜᴩᴩᴏʀ𝚃', url='https://t.me/DigitalBotz_Support')
         ],[
         InlineKeyboardButton('Aʙᴏυᴛ', callback_data='about'),
-        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help'),
-        InlineKeyboardButton('⚙️ Sᴇᴛᴛɪɴɢꜱ', callback_data='settings')       
+        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help')       
          ]]
             
         
@@ -83,67 +80,6 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup = InlineKeyboardMarkup(start_button))
         
-    elif data == "settings":
-        user_id = query.from_user.id
-        mode = await digital_botz.get_rename_mode(user_id)
-        upload_type = await digital_botz.get_upload_type(user_id)
-        mode_text = "🤖 AUTO" if mode == "auto" else "✍️ MANUAL"
-        type_text = {"doc": "📁 DOCUMENT", "video": "🎥 VIDEO", "audio": "🎵 AUDIO"}.get(upload_type, "Not set")
-        await query.message.edit_text(
-            "⚙️ **Your Settings**\n\n"
-            f"◈ Rename Mode: **{mode_text}**\n"
-            f"◈ Output Type: **{type_text}**\n\nChoose an option below:",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🤖 Rename Mode", callback_data="mode")],
-                [InlineKeyboardButton("📤 Output Type", callback_data="settings_type")],
-                [InlineKeyboardButton("✖️ Cancel", callback_data="settings_cancel")]
-            ])
-        )
-        await query.answer()
-
-    elif data == "mode":
-        current_mode = await digital_botz.get_rename_mode(query.from_user.id)
-        mode_text = "AUTO ✅" if current_mode == "auto" else "MANUAL ✅"
-        await query.message.edit_text(
-            f"⚙️ **Rename Mode Settings**\n\nCurrent Mode: **{mode_text}**\n\nChoose how the bot should handle incoming files.",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🤖 Auto", callback_data="mode_auto"),
-                 InlineKeyboardButton("✍️ Manual", callback_data="mode_manual")],
-                [InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]
-            ])
-        )
-        await query.answer()
-
-    elif data == "mode_auto":
-        await digital_botz.set_rename_mode(query.from_user.id, "auto")
-        await query.message.edit_text(
-            "✅ **Auto Mode Enabled**\n\nIncoming files will use your saved auto-rename format.",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]])
-        )
-        await query.answer("Auto mode saved ✅")
-
-    elif data == "mode_manual":
-        await digital_botz.set_rename_mode(query.from_user.id, "manual")
-        await query.message.edit_text(
-            "✅ **Manual Mode Enabled**\n\nIncoming files will ask you for the new filename.",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]])
-        )
-        await query.answer("Manual mode saved ✅")
-
-    elif data == "mode_manual_rename":
-        await query.message.edit_text(
-            "✍️ **Manual Rename**\\n\\nReply to this message with the new filename.\\n\\nExample: `One Piece - 01.mkv`",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]])
-        )
-        await query.answer()
-
-    elif data == "mode_cancel":
-        try:
-            await query.message.delete()
-        except:
-            pass
-        await query.answer()
-
     elif data == "help":
         await query.message.edit_text(
             text=rkn.HELP_TXT,

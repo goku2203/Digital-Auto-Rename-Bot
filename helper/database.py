@@ -49,8 +49,7 @@ class Database:
             file_id=None,
             caption=None,
             join_date=datetime.date.today().isoformat(),
-            format_template="{filename}",  # Default format template
-            rename_mode="manual",       # Default rename mode
+            format_template="{filename}",  # Default format template            
             ban_status=dict(
                 is_banned=False,
                 ban_duration=0,
@@ -142,21 +141,6 @@ class Database:
         """Get user's rename format template"""
         user = await self.col.find_one({"_id": int(user_id)})
         return user.get("format_template") if user else None
-
-    async def set_rename_mode(self, id, mode):
-        """Save user rename mode permanently in MongoDB."""
-        if mode not in ("auto", "manual"):
-            return
-        await self.col.update_one(
-            {"_id": int(id)},
-            {"$set": {"rename_mode": mode}},
-            upsert=True
-        )
-
-    async def get_rename_mode(self, id):
-        """Get saved rename mode. Manual is the safe default."""
-        user = await self.col.find_one({"_id": int(id)})
-        return user.get("rename_mode", "manual") if user else "manual"
 
     async def set_upload_type(self, id, upload_type):
         await self.col.update_one({'_id': int(id)}, {'$set': {'upload_type': upload_type}})
