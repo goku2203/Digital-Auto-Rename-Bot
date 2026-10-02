@@ -80,16 +80,32 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup = InlineKeyboardMarkup(start_button))
         
+    elif data == "settings":
+        user_id = query.from_user.id
+        mode = await digital_botz.get_rename_mode(user_id)
+        upload_type = await digital_botz.get_upload_type(user_id)
+        mode_text = "🤖 AUTO" if mode == "auto" else "✍️ MANUAL"
+        type_text = {"doc": "📁 DOCUMENT", "video": "🎥 VIDEO", "audio": "🎵 AUDIO"}.get(upload_type, "Not set")
+        await query.message.edit_text(
+            "⚙️ **Your Settings**\\n\\n"
+            f"◈ Rename Mode: **{mode_text}**\\n"
+            f"◈ Output Type: **{type_text}**\\n\\nChoose an option below:",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🤖 Rename Mode", callback_data="mode")],
+                [InlineKeyboardButton("📤 Output Type", callback_data="settings_type")],
+                [InlineKeyboardButton("✖️ Cancel", callback_data="settings_cancel")]
+            ])
+        )
+        await query.answer()
+
     elif data == "mode":
         current_mode = await digital_botz.get_rename_mode(query.from_user.id)
         mode_text = "AUTO ✅" if current_mode == "auto" else "MANUAL ✅"
         await query.message.edit_text(
             f"⚙️ **Rename Mode Settings**\\n\\nCurrent Mode: **{mode_text}**\\n\\nChoose how the bot should handle incoming files.",
             reply_markup=InlineKeyboardMarkup([
-                [
-                    InlineKeyboardButton("🤖 Auto", callback_data="mode_auto"),
-                    InlineKeyboardButton("✍️ Manual", callback_data="mode_manual")
-                ],
+                [InlineKeyboardButton("🤖 Auto", callback_data="mode_auto"),
+                 InlineKeyboardButton("✍️ Manual", callback_data="mode_manual")],
                 [InlineKeyboardButton("✖️ Cancel", callback_data="mode_cancel")]
             ])
         )
