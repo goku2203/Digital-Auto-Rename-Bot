@@ -78,7 +78,8 @@ class DigitalAutoRenameBot(Client):
         import plugins.settings
         import plugins.start_and_cb
         import plugins.thumb_and_cap
-        print("Digital Botz Plugins Loaded")\n        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
+        print("Digital Botz Plugins Loaded")
+        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
         for id in Config.ADMIN:
             if Config.STRING_SESSION:
