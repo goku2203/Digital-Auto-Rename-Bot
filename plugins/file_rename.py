@@ -305,7 +305,7 @@ async def upload_doc(bot, update, requested_name=None):
     await rkn_processing.edit("`Try To Uploading....`")        
     duration = 0
     try:
-        parser = createParser(file_path)
+        parser = createParser(final_file_path)
         metadata = extractMetadata(parser)
         if metadata and metadata.has("duration"):
             duration = metadata.get('duration').seconds
