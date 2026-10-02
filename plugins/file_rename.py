@@ -351,8 +351,8 @@ async def upload_doc(bot, update, requested_name=None):
             ph_path, caption, duration, rkn_processing
         )
 
-        if error:            
-            await remove_path(ph_path, file_path, dl_path)
+        if error:
+            await remove_path(ph_path, final_file_path, dl_path)
             return await rkn_processing.edit(f"Upload Error: {error}")
         
         from_chat = filw.chat.id
@@ -372,7 +372,7 @@ async def upload_doc(bot, update, requested_name=None):
             return await rkn_processing.edit(f"Upload Error: {error}")        
 
     # Clean up files
-    await remove_path(ph_path, file_path, dl_path)
+    await remove_path(ph_path, final_file_path, dl_path)
     return await rkn_processing.edit("Uploaded Successfully....")
 
 @Client.on_message(filters.private & filters.command("set_type"))
