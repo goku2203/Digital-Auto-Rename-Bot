@@ -51,7 +51,8 @@ async def start(client, message):
         InlineKeyboardButton('Sᴜᴩᴩᴏʀ𝚃', url='https://t.me/DigitalBotz_Support')
         ],[
         InlineKeyboardButton('Aʙᴏυᴛ', callback_data='about'),
-        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help')       
+        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help'),
+        InlineKeyboardButton('⚙️ Sᴇᴛᴛɪɴɢꜱ', callback_data='settings')
          ]]
         
     
