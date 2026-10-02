@@ -45,6 +45,7 @@ from PIL import Image
 from helper.utils import progress_for_pyrogram, convert, humanbytes, add_prefix_suffix, remove_path
 from helper.database import digital_botz
 from config import Config
+from bot_settings import BotSettings
 from plugins.auto_rename import EnhancedAutoRenamer
 
 # extra imports
@@ -268,7 +269,7 @@ async def upload_doc(bot, update, requested_name=None):
         new_filename = renamer.apply_format_template(info, format_template)
 
         # Add extension if not present.
-        if not new_filename.endswith(f".{info['extension']}"):
+        if info["extension"] and not new_filename.lower().endswith(f".{info['extension'].lower()}"):
             new_filename += f".{info['extension']}"
     print(f"[RENAME-DEBUG] raw={media.file_name!r} -> new={new_filename!r}")
         
@@ -286,7 +287,7 @@ async def upload_doc(bot, update, requested_name=None):
     out_path = f"Renames/meta_{new_filename}"
     
     # Using your specific username for ALL metadata titles instead of the full filename
-    custom_metadata_title = "@anime_love9"
+    custom_metadata_title = BotSettings.METADATA_TITLE
     
     cmd = f'ffmpeg -y -i "{file_path}" -c copy -map 0 -metadata title="{custom_metadata_title}" -metadata:s:v title="{custom_metadata_title}" -metadata:s:a title="{custom_metadata_title}" -metadata:s:s title="{custom_metadata_title}" "{out_path}"'
     
