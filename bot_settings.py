@@ -7,7 +7,9 @@ class BotSettings:
     START_PIC = os.environ.get("RKN_PIC", "https://files.catbox.moe/94kw2e.jpg")
     FORCE_SUB = os.environ.get("FORCE_SUB", "anime_love9").lstrip("@")
     LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "")
-    FREE_UPLOAD_LIMIT = 0  # Fixed the missing attribute error
+    FREE_UPLOAD_LIMIT = 0
+    METADATA_TITLE = "@Goku_Stark"
+    KEEP_TAG = "@Goku_Stark"
 
     START_TEXT = """<b>Hi {} 👋
 
