@@ -11,7 +11,9 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from helper.database import digital_botz
 
-KEEP_TAG = "@anime_love9"
+from bot_settings import BotSettings
+
+KEEP_TAG = BotSettings.KEEP_TAG
 
 _EXTS = (
     "mkv|mp4|avi|webm|mov|m4v|ts|flv|wmv|mp3|m4a|flac|aac|ogg|wav|"
