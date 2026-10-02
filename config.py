@@ -11,23 +11,23 @@ id_pattern = re.compile(r'^\d+$')
 
 
 class Config:
-    API_ID = int(os.environ.get("API_ID", "0"))
-    API_HASH = os.environ.get("API_HASH", "")
-    BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+    API_ID = int(os.environ.get("API_ID", "25169055"))
+    API_HASH = os.environ.get("API_HASH", "d70362ef232cc5ec4cb0b8d1ba6cc60e")
+    BOT_TOKEN = os.environ.get("BOT_TOKEN", "7706580536:AAH6l8NhZsSIGxiOJQmqcZJrKyMloCIyMHw")
     BOT = None
 
     STRING_SESSION = os.environ.get("STRING_SESSION", "")
 
-    DB_NAME = os.environ.get("DB_NAME", "Digital_Auto_Rename_Bot")
-    DB_URL = os.environ.get("DB_URL", "")
+    DB_NAME = os.environ.get("DB_NAME", "Cluster0")
+    DB_URL = os.environ.get("DB_URL", "mongodb+srv://masamin643_db_user:aqunP8EES9YndDQt@cluster0.rgnbdf5.mongodb.net/?appName=Cluster0")
 
     ADMIN = [
         int(value)
-        for value in os.environ.get("ADMIN", "").split()
+        for value in os.environ.get("ADMIN", "6629872386").split()
         if value and id_pattern.fullmatch(value)
     ]
 
-    LOG_CHANNEL = int(os.environ["LOG_CHANNEL"]) if os.environ.get("LOG_CHANNEL") else None
+    LOG_CHANNEL = int(os.environ["LOG_CHANNEL"]) if os.environ.get("-1003742596813") else None
 
     FREE_UPLOAD_LIMIT = BotSettings.FREE_UPLOAD_LIMIT
     UPLOAD_LIMIT_MODE = os.environ.get("UPLOAD_LIMIT_MODE", "true").lower() == "true"
