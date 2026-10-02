@@ -20,7 +20,7 @@ class Config:
     ADMIN = [int(admin) for admin in os.environ.get("ADMIN", "").split() if admin and id_pattern.match(admin)]
     LOG_CHANNEL = int(os.environ["LOG_CHANNEL"]) if os.environ.get("LOG_CHANNEL") else None
 
-    FREE_UPLOAD_LIMIT = 6442450944
+    FREE_UPLOAD_LIMIT = BotSettings.FREE_UPLOAD_LIMIT
     UPLOAD_LIMIT_MODE = bool(os.environ.get("UPLOAD_LIMIT_MODE", "true").lower() == "true")
     PREMIUM_MODE = bool(os.environ.get("PREMIUM_MODE", "true").lower() == "true")
 
