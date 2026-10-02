@@ -73,7 +73,12 @@ class DigitalAutoRenameBot(Client):
         bind_address = "0.0.0.0"
         await aiohttp.web.TCPSite(app, bind_address, Config.PORT).start()
 
-        # Import each plugin exactly once. Dynamic re-importing duplicates handlers and can break the bot.\n        import plugins.admin_panel\n        import plugins.settings\n        import plugins.start_and_cb\n        import plugins.thumb_and_cap\n        print("Digital Botz Plugins Loaded")\n        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
+        # Import each plugin exactly once. Dynamic re-importing duplicates handlers and can break the bot.
+        import plugins.admin_panel
+        import plugins.settings
+        import plugins.start_and_cb
+        import plugins.thumb_and_cap
+        print("Digital Botz Plugins Loaded")\n        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
         for id in Config.ADMIN:
             if Config.STRING_SESSION:
