@@ -345,8 +345,6 @@ async def upload_doc(bot, update, requested_name=None):
              print(f"Error processing thumbnail: {e}")
              ph_path = None
 
-    # Keep the metadata-remuxed output when available.
-    final_file_path = f"Renames/{new_filename}"
     if media.file_size > 2000 * 1024 * 1024:
         # Upload file using unified function for large files
         filw, error = await upload_files(
