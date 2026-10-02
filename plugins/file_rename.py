@@ -232,11 +232,13 @@ async def upload_doc(bot, update, requested_name=None):
     user_id = int(update.message.chat.id) 
     new_name = requested_name or update.message.text
 
-    # msg file location 
+    # Original incoming file message.
     file = update.message.reply_to_message
-    if not file:
+    if not file or not file.media:
         return await rkn_processing.edit("Error: Original file message is missing or deleted! Please resend the file.")
-    media = getattr(file, file.media.value)
+    media = getattr(file, file.media.value, None)
+    if not media or not getattr(media, "file_name", None):
+        return await rkn_processing.edit("Error: File information is missing. Please resend the file.")
 
     
     # Extract information
@@ -278,6 +280,7 @@ async def upload_doc(bot, update, requested_name=None):
         return await rkn_processing.edit(f"Download Error: {e}")
     
     await rkn_processing.edit("`Adding Metadata...`")
+    os.makedirs("Renames", exist_ok=True)
     out_path = f"Renames/meta_{new_filename}"
     
     # Using your specific username for ALL metadata titles instead of the full filename
@@ -286,7 +289,9 @@ async def upload_doc(bot, update, requested_name=None):
     cmd = f'ffmpeg -y -i "{file_path}" -c copy -map 0 -metadata title="{custom_metadata_title}" -metadata:s:v title="{custom_metadata_title}" -metadata:s:a title="{custom_metadata_title}" -metadata:s:s title="{custom_metadata_title}" "{out_path}"'
     
     proc = await asyncio.create_subprocess_shell(cmd)
-    await proc.communicate()
+    _, stderr = await proc.communicate()
+    if proc.returncode != 0:
+        print(f"[FFMPEG] metadata command failed: {stderr.decode(errors="ignore")[:1000] if stderr else "unknown error"}")
     
     if os.path.exists(out_path):
         os.remove(file_path)
@@ -337,8 +342,8 @@ async def upload_doc(bot, update, requested_name=None):
              print(f"Error processing thumbnail: {e}")
              ph_path = None
 
-    # Use the correct file path based on metadata mode
-    final_file_path = file_path    
+    # If metadata remux succeeded, it replaced file_path with the new output.
+    final_file_path = file_path
     if media.file_size > 2000 * 1024 * 1024:
         # Upload file using unified function for large files
         filw, error = await upload_files(
