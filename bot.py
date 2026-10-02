@@ -31,10 +31,6 @@ License Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot/blob/main/
 
 import aiohttp, asyncio, warnings, pytz, datetime
 import logging
-import logging.config
-import glob, sys
-import importlib.util
-from pathlib import Path
 
 from pyrogram import Client, __version__, errors
 from pyrogram.raw.all import layer
@@ -77,27 +73,7 @@ class DigitalAutoRenameBot(Client):
         bind_address = "0.0.0.0"
         await aiohttp.web.TCPSite(app, bind_address, Config.PORT).start()
 
-        path = "plugins/*.py"
-        files = sorted(glob.glob(path))
-        # These two are already imported through file_rename.app.
-        # Loading them again would register duplicate handlers.
-        skip_plugins = {"file_rename", "auto_rename"}
-        for name in files:
-            with open(name) as a:
-                patt = Path(a.name)
-                plugin_name = patt.stem.replace(".py", "")
-                if plugin_name in skip_plugins:
-                    print("Digital Botz Skipped " + plugin_name + " (already loaded)")
-                    continue
-                plugins_path = Path(f"plugins/{plugin_name}.py")
-                import_path = "plugins.{}".format(plugin_name)
-                spec = importlib.util.spec_from_file_location(import_path, plugins_path)
-                load = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(load)
-                sys.modules["plugins" + plugin_name] = load
-                print("Digital Botz Imported " + plugin_name)
-
-        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
+        # Import each plugin exactly once. Dynamic re-importing duplicates handlers and can break the bot.\n        import plugins.admin_panel\n        import plugins.settings\n        import plugins.start_and_cb\n        import plugins.thumb_and_cap\n        print("Digital Botz Plugins Loaded")\n        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
         for id in Config.ADMIN:
             if Config.STRING_SESSION:
@@ -116,7 +92,7 @@ class DigitalAutoRenameBot(Client):
                 curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
                 date = curr.strftime('%d %B, %Y')
                 time = curr.strftime('%I:%M:%S %p')
-                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`</b>")
+                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`")
             except:
                 print("Pʟᴇᴀsᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
 
