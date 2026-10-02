@@ -30,6 +30,8 @@ class Config:
 
 from bot_settings import BotSettings
 
+Config_RKN_PIC = BotSettings.START_PIC
+
 class rkn:
     START_TXT = BotSettings.START_TEXT
     ABOUT_TXT = BotSettings.ABOUT_TEXT
@@ -45,6 +47,7 @@ class rkn:
 • ❣️ <a href=https://github.com/RknDeveloper>RknDeveloper</a>
 • ❣️ <a href=https://github.com/DigitalBotz>DigitalBotz</a>
 • ❣️ <a href=https://github.com/JayMahakal98>Jay Mahakal</a>"""
+    RKN_PIC = BotSettings.START_PIC
     RKN_PROGRESS = """<b>
 
 ⦿ 📈 𝙿𝚛𝚘𝚐𝚛𝚎𝚜𝚜  : {0}%
