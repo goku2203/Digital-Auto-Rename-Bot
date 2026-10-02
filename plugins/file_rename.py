@@ -291,7 +291,7 @@ async def upload_doc(bot, update, requested_name=None):
     proc = await asyncio.create_subprocess_shell(cmd)
     _, stderr = await proc.communicate()
     if proc.returncode != 0:
-        print(f"[FFMPEG] metadata command failed: {stderr.decode(errors="ignore")[:1000] if stderr else "unknown error"}")
+        print(f"[FFMPEG] metadata command failed: {stderr.decode(errors='ignore')[:1000] if stderr else 'unknown error'}")
     
     if os.path.exists(out_path):
         os.remove(file_path)
