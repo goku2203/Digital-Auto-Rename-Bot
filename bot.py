@@ -32,9 +32,6 @@ License Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot/blob/main/
 # extra imports
 import aiohttp, asyncio, warnings, pytz, datetime
 import logging
-import logging.config
-import glob, sys
-import importlib.util
 from pathlib import Path
 
 # pyrogram imports
@@ -53,7 +50,6 @@ logging.basicConfig(
     handlers=[logging.FileHandler('BotLog.txt'),
              logging.StreamHandler()]
 )
-#logger = logging.getLogger(__name__)
 logging.getLogger("pyrofork").setLevel(logging.WARNING)
 
 class DigitalAutoRenameBot(Client):
@@ -80,25 +76,12 @@ class DigitalAutoRenameBot(Client):
         self.uploadlimit = Config.UPLOAD_LIMIT_MODE
         Config.BOT = self
         
-        app = aiohttp.web.AppRunner(await web_server())
-        await app.setup()
+        app_runner = aiohttp.web.AppRunner(await web_server())
+        await app_runner.setup()
         bind_address = "0.0.0.0"
-        await aiohttp.web.TCPSite(app, bind_address, Config.PORT).start()
+        await aiohttp.web.TCPSite(app_runner, bind_address, Config.PORT).start()
         
-        path = "plugins/*.py"
-        files = glob.glob(path)
-        for name in files:
-            with open(name) as a:
-                patt = Path(a.name)
-                plugin_name = patt.stem.replace(".py", "")
-                plugins_path = Path(f"plugins/{plugin_name}.py")
-                import_path = "plugins.{}".format(plugin_name)
-                spec = importlib.util.spec_from_file_location(import_path, plugins_path)
-                load = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(load)
-                sys.modules["plugins" + plugin_name] = load
-                print("Digital Botz Imported " + plugin_name)
-                
+        print("Digital Botz Plugins Loaded")
         print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
         
@@ -163,10 +146,3 @@ if __name__ == "__main__":
         asyncio.run(asyncio.sleep(ft.value))
         print("Now Ready For Deploying!")
         main()
-        
-
-# Rkn Developer 
-# Don't Remove Credit 😔
-# Telegram Channel @RknDeveloper & @Rkn_Botz
-# Developer @RknDeveloperr
-# Update Channel @Digital_Botz & @DigitalBotz_Support
