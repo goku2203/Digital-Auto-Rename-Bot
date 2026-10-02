@@ -71,7 +71,8 @@ async def cb_handler(client, query: CallbackQuery):
         InlineKeyboardButton('Sᴜᴩᴩᴏʀ𝚃', url='https://t.me/DigitalBotz_Support')
         ],[
         InlineKeyboardButton('Aʙᴏυᴛ', callback_data='about'),
-        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help')       
+        InlineKeyboardButton('Hᴇʟᴩ', callback_data='help'),
+        InlineKeyboardButton('⚙️ Sᴇᴛᴛɪɴɢꜱ', callback_data='settings')       
          ]]
             
         
@@ -87,9 +88,9 @@ async def cb_handler(client, query: CallbackQuery):
         mode_text = "🤖 AUTO" if mode == "auto" else "✍️ MANUAL"
         type_text = {"doc": "📁 DOCUMENT", "video": "🎥 VIDEO", "audio": "🎵 AUDIO"}.get(upload_type, "Not set")
         await query.message.edit_text(
-            "⚙️ **Your Settings**\\n\\n"
-            f"◈ Rename Mode: **{mode_text}**\\n"
-            f"◈ Output Type: **{type_text}**\\n\\nChoose an option below:",
+            "⚙️ **Your Settings**\n\n"
+            f"◈ Rename Mode: **{mode_text}**\n"
+            f"◈ Output Type: **{type_text}**\n\nChoose an option below:",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🤖 Rename Mode", callback_data="mode")],
                 [InlineKeyboardButton("📤 Output Type", callback_data="settings_type")],
